@@ -2,10 +2,12 @@
   "name": "@mia-platform/js-crud-service-client",
   "version": "0.1.0",
   "description": "The official crud-service JavaScript client",
-  "main": "index.js",
+  "type": "module",
+  "main": "dist/es/index.js",
   "scripts": {
     "test": "test",
-    "lint": "eslint . --ignore-path .gitignore"
+    "check-types": "tsc --noEmit --skipLibCheck",
+    "lint": "eslint . --ext .ts --ignore-path .gitignore"
   },
   "repository": {
     "type": "git",
