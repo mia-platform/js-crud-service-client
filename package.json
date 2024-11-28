@@ -19,7 +19,17 @@
   "homepage": "https://github.com/mia-platform/js-crud-service-client#readme",
   "devDependencies": {
     "@mia-platform/eslint-config-mia": "^3.0.0",
-    "eslint": "^9.15.0",
+    "@types/http-errors": "^2.0.4",
+    "@types/lodash-es": "^4.17.12",
+    "@types/qs": "^6.9.17",
+    "eslint": "^8.57.1",
+    "pino": "^9.5.0",
     "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "got": "^11.8.6",
+    "http-errors": "^2.0.0",
+    "lodash-es": "^4.17.21",
+    "qs": "^6.13.1"
   }
 }
