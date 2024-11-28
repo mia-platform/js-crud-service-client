@@ -1,0 +1,25 @@
+{
+  "name": "@mia-platform/js-crud-service-client",
+  "version": "0.1.0",
+  "description": "The official crud-service JavaScript client",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "lint": "eslint . --ignore-path .gitignore"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mia-platform/js-crud-service-client.git"
+  },
+  "author": "fabio.nappi@mia-platform.eu",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/mia-platform/js-crud-service-client/issues"
+  },
+  "homepage": "https://github.com/mia-platform/js-crud-service-client#readme",
+  "devDependencies": {
+    "@mia-platform/eslint-config-mia": "^3.0.0",
+    "eslint": "^9.15.0",
+    "typescript": "^5.7.2"
+  }
+}
