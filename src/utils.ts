@@ -10,7 +10,7 @@ export type KeysMatching<T, V> = {[K in keyof T]-?: T[K] extends V ? K : never}[
 
 export type HeadersToProxy = Record<string, string | string[] | undefined>
 
-export interface ClientRequestContext {
+export type ClientRequestContext = {
   logger: BaseLogger
   headersToProxy: HeadersToProxy
   userHeaders: HeadersToProxy,
@@ -18,15 +18,15 @@ export interface ClientRequestContext {
   localRequestId: string
 }
 
-function getGotErrorStatusCode (error: RequestError): number | undefined {
-  if (error.response && error.response.statusCode) {
+function getGotErrorStatusCode(error: RequestError): number | undefined {
+  if (error.response?.statusCode) {
     return error.response.statusCode
   }
   return undefined
 }
 
-function getGotErrorMessage (error: RequestError): string {
-  if (error.response && error.response.body && (error.response.body as {message?: string}).message) {
+function getGotErrorMessage(error: RequestError): string {
+  if (error.response?.body && (error.response.body as {message?: string}).message) {
     return (error.response.body as {message: string}).message
   }
 
@@ -37,10 +37,10 @@ function getGotErrorMessage (error: RequestError): string {
   return 'Something went wrong'
 }
 
-function getHttpErrors (error: RequestError): HttpError {
-  return httpErrors(getGotErrorStatusCode(error) || 500, getGotErrorMessage(error))
+function getHttpErrors(error: RequestError): HttpError {
+  return httpErrors(getGotErrorStatusCode(error) ?? 500, getGotErrorMessage(error))
 }
 
 export {
-  getHttpErrors
+  getHttpErrors,
 }

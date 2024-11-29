@@ -5,7 +5,7 @@ import { isEmpty } from 'lodash-es'
 
 import { type ClientRequestContext, type KeysMatching, getHttpErrors } from './utils'
 
-interface CrudUID {
+type CrudUID = {
   _id: string
 }
 
@@ -15,13 +15,13 @@ type PatchBulkEntry<T> = {
 }
 export type PatchBulkBody<T> = PatchBulkEntry<T>[]
 
-export interface PatchBody<T>{
+export type PatchBody<T> = {
   $set?: Partial<T> & Record<string, unknown>
   $unset?: Partial<T> & Record<string, unknown>
   $inc?: Partial<KeysMatching<T, number>>
   $mul?: Partial<KeysMatching<T, number>>
   $currentDate?: Partial<T>
-  $push?: Partial<KeysMatching<T, Array<unknown>>> | Record<string, unknown>
+  $push?: Partial<KeysMatching<T, unknown[]>> | Record<string, unknown>
 }
 
 export type ICrudClient<T> = Omit<CrudClient<T>, 'client' | 'resource'>
@@ -30,15 +30,15 @@ class CrudClient<T> implements ICrudClient<T> {
   protected client
   protected resource
 
-  constructor (prefixUrl: string, resource: string) {
+  constructor(prefixUrl: string, resource: string) {
     this.client = got.extend({
       prefixUrl,
-      retry: 0
+      retry: 0,
     })
     this.resource = resource
   }
 
-  async getList (ctx: ClientRequestContext, filter?: Filter): Promise<T[]> {
+  async getList(ctx: ClientRequestContext, filter?: Filter): Promise<T[]> {
     const { logger, headersToProxy } = ctx
     try {
       const { body: itemList } = await this.client.get<T[]>('', {
@@ -47,8 +47,8 @@ class CrudClient<T> implements ICrudClient<T> {
         searchParams: queryFromFilter(filter),
         headers: {
           'content-type': 'application/json',
-          ...headersToProxy
-        }
+          ...headersToProxy,
+        },
       })
       logger.debug({ itemsLength: itemList.length, crudResource: this.resource }, 'list of item')
       return itemList
@@ -65,7 +65,7 @@ class CrudClient<T> implements ICrudClient<T> {
    *
    * @warning be careful about the size of the data to export, remember to set a reasonable limit
    */
-  async getExport (ctx: ClientRequestContext, filter?: Filter): Promise<Array<T>> {
+  async getExport(ctx: ClientRequestContext, filter?: Filter): Promise<T[]> {
     const { logger, headersToProxy } = ctx
     try {
       const stream = this.client.stream('export', {
@@ -73,14 +73,14 @@ class CrudClient<T> implements ICrudClient<T> {
         searchParams: queryFromFilter(filter),
         headers: {
           'content-type': 'application/x-ndjson',
-          ...headersToProxy
-        }
+          ...headersToProxy,
+        },
       })
 
       logger.debug({ crudResource: this.resource }, 'export of data')
 
-      const data = await new Promise<Array<T>>((resolve, reject) => {
-        let items: Array<T> = []
+      const data = await new Promise<T[]>((resolve, reject) => {
+        let items: T[] = []
         let data = ''
 
         stream
@@ -115,7 +115,7 @@ class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async count (ctx: ClientRequestContext, filter?: Omit<Filter, 'projection'>): Promise<number> {
+  async count(ctx: ClientRequestContext, filter?: Omit<Filter, 'projection'>): Promise<number> {
     const { logger, headersToProxy } = ctx
     try {
       const { body: count } = await this.client.get<number>('count', {
@@ -124,8 +124,8 @@ class CrudClient<T> implements ICrudClient<T> {
         searchParams: queryFromFilter(filter),
         headers: {
           'content-type': 'application/json',
-          ...headersToProxy
-        }
+          ...headersToProxy,
+        },
       })
       logger.debug({ count, filter, crudResource: this.resource }, 'count of items')
       return count
@@ -135,7 +135,7 @@ class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async getById (ctx: ClientRequestContext, id: string, filter?: Pick<Filter, 'projection'>): Promise<T> {
+  async getById(ctx: ClientRequestContext, id: string, filter?: Pick<Filter, 'projection'>): Promise<T> {
     const { logger, headersToProxy } = ctx
     try {
       const { body: item } = await this.client.get<T>(id, {
@@ -144,8 +144,8 @@ class CrudClient<T> implements ICrudClient<T> {
         searchParams: queryFromFilter(filter),
         headers: {
           'content-type': 'application/json',
-          ...headersToProxy
-        }
+          ...headersToProxy,
+        },
       })
 
       logger.debug({ itemId: id, crudResource: this.resource }, 'get item by id')
@@ -156,13 +156,13 @@ class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async create (ctx: ClientRequestContext, body: Omit<T, '_id'>): Promise<CrudUID> {
+  async create(ctx: ClientRequestContext, body: Omit<T, '_id'>): Promise<CrudUID> {
     const { logger, headersToProxy } = ctx
     try {
       const { body: item } = await this.client.post<CrudUID>('', {
         json: body,
         responseType: 'json',
-        headers: headersToProxy
+        headers: headersToProxy,
       })
       logger.debug({ itemId: item._id }, 'created item')
       return item
@@ -172,13 +172,13 @@ class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async bulkInsert (ctx: ClientRequestContext, body: Omit<T, '_id' | 'createdAt' | 'creatorId' | 'updatedAt' | 'updaterId'>[]): Promise<CrudUID[]> {
+  async bulkInsert(ctx: ClientRequestContext, body: Omit<T, '_id' | 'createdAt' | 'creatorId' | 'updatedAt' | 'updaterId'>[]): Promise<CrudUID[]> {
     const { logger, headersToProxy } = ctx
     try {
       const { body: itemIds } = await this.client.post<CrudUID[]>('bulk', {
         json: body,
         responseType: 'json',
-        headers: headersToProxy
+        headers: headersToProxy,
       })
       logger.debug({ itemIds }, 'created items in bulk')
       return itemIds
@@ -188,14 +188,14 @@ class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async upsertOne (ctx: ClientRequestContext, body: Record<string, unknown>, filter?: Filter): Promise<T> {
+  async upsertOne(ctx: ClientRequestContext, body: Record<string, unknown>, filter?: Filter): Promise<T> {
     const { logger, headersToProxy } = ctx
     try {
       const { body: item } = await this.client.post<T & CrudUID>('upsert-one', {
         json: body,
         responseType: 'json',
         searchParams: queryFromFilter(filter),
-        headers: headersToProxy
+        headers: headersToProxy,
       })
       logger.debug({ itemId: item._id }, 'upserted item')
       return item
@@ -205,14 +205,14 @@ class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async updateById (ctx: ClientRequestContext, id: string, body: PatchBody<T>, filter?: Filter): Promise<T> {
+  async updateById(ctx: ClientRequestContext, id: string, body: PatchBody<T>, filter?: Filter): Promise<T> {
     const { logger, headersToProxy } = ctx
     try {
       const { body: item } = await this.client.patch<T>(id, {
         json: body,
         responseType: 'json',
         searchParams: queryFromFilter(filter),
-        headers: headersToProxy
+        headers: headersToProxy,
       })
       logger.debug({ itemId: id, crudResource: this.resource }, 'update item by id')
       return item
@@ -222,14 +222,14 @@ class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async updateMany (ctx: ClientRequestContext, body: PatchBody<T>, filter?: Filter): Promise<number> {
+  async updateMany(ctx: ClientRequestContext, body: PatchBody<T>, filter?: Filter): Promise<number> {
     const { logger, headersToProxy } = ctx
     try {
       const { body: item } = await this.client.patch<number>('', {
         json: body,
         responseType: 'json',
         searchParams: queryFromFilter(filter),
-        headers: headersToProxy
+        headers: headersToProxy,
       })
       logger.debug({ crudResource: this.resource }, 'update items')
       return item
@@ -239,13 +239,13 @@ class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async updateBulk (ctx: ClientRequestContext, body: PatchBulkBody<T>): Promise<number> {
+  async updateBulk(ctx: ClientRequestContext, body: PatchBulkBody<T>): Promise<number> {
     const { logger, headersToProxy } = ctx
     try {
       const { body: updatedCount } = await this.client.patch<number>('bulk', {
         json: body,
         responseType: 'json',
-        headers: headersToProxy
+        headers: headersToProxy,
       })
       logger.debug({ crudResource: this.resource }, 'update items')
       return updatedCount
@@ -255,13 +255,13 @@ class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async trash (ctx: ClientRequestContext, id: string) {
+  async trash(ctx: ClientRequestContext, id: string) {
     const { logger, headersToProxy } = ctx
     try {
       await this.client.post<T>(`${id}/state`, {
         json: { stateTo: 'TRASH' },
         responseType: 'json',
-        headers: headersToProxy
+        headers: headersToProxy,
       })
     } catch (error) {
       logger.error({ error, itemId: id }, 'failed to trash item by id')
@@ -269,12 +269,12 @@ class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async deleteOne (ctx: ClientRequestContext, id: string) {
+  async deleteOne(ctx: ClientRequestContext, id: string) {
     const { logger, headersToProxy } = ctx
     try {
       await this.client.delete<T>(`${id}`, {
         responseType: 'json',
-        headers: headersToProxy
+        headers: headersToProxy,
       })
     } catch (error) {
       logger.error({ error, itemId: id }, 'failed to delete item by id')
@@ -282,7 +282,7 @@ class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async delete (ctx: ClientRequestContext, filter: Filter) {
+  async delete(ctx: ClientRequestContext, filter: Filter) {
     if (isEmpty(filter.mongoQuery)) {
       throw new httpErrors.BadRequest('Mongo query is required')
     }
@@ -292,7 +292,7 @@ class CrudClient<T> implements ICrudClient<T> {
       await this.client.delete<T>('', {
         responseType: 'json',
         headers: headersToProxy,
-        searchParams: queryFromFilter(filter)
+        searchParams: queryFromFilter(filter),
       })
     } catch (error) {
       logger.error({ error }, 'failed to delete items')
@@ -301,7 +301,7 @@ class CrudClient<T> implements ICrudClient<T> {
   }
 }
 
-export interface Filter {
+export type Filter = {
   mongoQuery?: Record<string, unknown>
   limit?: number
   skip?: number
@@ -309,7 +309,7 @@ export interface Filter {
   rawProjection?: Record<string, 1 | 0>
   sort?: string
 }
-function queryFromFilter (filter: Filter | undefined) {
+function queryFromFilter(filter: Filter | undefined) {
   return filter
     ? qs.stringify({
       _q: filter.mongoQuery ? JSON.stringify(filter.mongoQuery) : undefined,
@@ -317,7 +317,7 @@ function queryFromFilter (filter: Filter | undefined) {
       _p: filter.projection?.join(','),
       _s: filter.sort,
       _sk: filter.skip,
-      _rawp: filter.rawProjection ? JSON.stringify(filter.rawProjection) : undefined
+      _rawp: filter.rawProjection ? JSON.stringify(filter.rawProjection) : undefined,
     })
     : undefined
 }
