@@ -1,5 +1,10 @@
 module.exports = {
-  ignorePatterns: [".eslintrc.cjs"],
+  ignorePatterns: [
+    "dist",
+    ".yarn",
+    ".vscode",
+    "node_modules"
+  ],
   
   root: true,
 

@@ -12,13 +12,21 @@
   "bugs": {
     "url": "https://github.com/mia-platform/js-crud-service-client/issues"
   },
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "packageManager": "yarn@4.5.3",
-  "main": "dist/es/index.js",
+  "main": "dist/cjs/index.cjs",
+  "module": "dist/es/index.mjs",
+  "types": "dist/types/index.d.ts",
   "scripts": {
+    "build:lib": "node --no-warnings --import=tsx scripts/build.ts",
+    "build:types": "tsc --project scripts/tsconfig.build.json",
+    "build": "yarn build:lib && yarn build:types",
     "test": "test",
     "check-types": "tsc --skipLibCheck",
-    "lint": "eslint . --ext .ts --ignore-path .gitignore"
+    "lint": "eslint ."
   },
   "dependencies": {
     "got": "^11.8.6",
@@ -33,6 +41,7 @@
     "@types/qs": "^6.9.17",
     "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^8.16.0",
+    "esbuild": "^0.24.0",
     "eslint": "^8.57.1",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.31.0",
@@ -41,6 +50,7 @@
     "eslint-plugin-unused-imports": "^3.2.0",
     "nock": "^13.5.6",
     "pino": "^9.5.0",
+    "rimraf": "^6.0.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },

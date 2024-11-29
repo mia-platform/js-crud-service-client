@@ -1,22 +1,25 @@
-/*
- * Copyright © 2021-present Mia s.r.l.
- * All rights reserved
+/**
+ * Copyright 2024 Mia srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  */
 import httpErrors, { type HttpError } from 'http-errors'
 import { type RequestError } from 'got'
-import { type BaseLogger } from 'pino'
+import qs from 'qs'
 
-export type KeysMatching<T, V> = {[K in keyof T]-?: T[K] extends V ? K : never}[keyof T];
-
-export type HeadersToProxy = Record<string, string | string[] | undefined>
-
-export type ClientRequestContext = {
-  logger: BaseLogger
-  headersToProxy: HeadersToProxy
-  userHeaders: HeadersToProxy,
-  requestId: string
-  localRequestId: string
-}
+import { type Filter } from './types'
 
 function getGotErrorStatusCode(error: RequestError): number | undefined {
   if (error.response?.statusCode) {
@@ -37,10 +40,19 @@ function getGotErrorMessage(error: RequestError): string {
   return 'Something went wrong'
 }
 
-function getHttpErrors(error: RequestError): HttpError {
+export function getHttpErrors(error: RequestError): HttpError {
   return httpErrors(getGotErrorStatusCode(error) ?? 500, getGotErrorMessage(error))
 }
 
-export {
-  getHttpErrors,
+export function queryFromFilter(filter: Filter | undefined): string | undefined {
+  return filter
+    ? qs.stringify({
+      _q: filter.mongoQuery ? JSON.stringify(filter.mongoQuery) : undefined,
+      _l: filter.limit,
+      _p: filter.projection?.join(','),
+      _s: filter.sort,
+      _sk: filter.skip,
+      _rawp: filter.rawProjection ? JSON.stringify(filter.rawProjection) : undefined,
+    })
+    : undefined
 }

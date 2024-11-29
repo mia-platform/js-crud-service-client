@@ -1,3 +1,20 @@
+/**
+ * Copyright 2024 Mia srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import nock from 'nock'
 import Pino from 'pino'
 import httpErrors from 'http-errors'
@@ -5,10 +22,9 @@ import { Readable } from 'stream'
 import { describe, it } from 'node:test'
 import assert from 'node:assert'
 
-import { ClientRequestContext } from '../src/utils'
-import CrudClient, { Filter } from '../src/CrudClient'
-import { buildMockNdjsonStream } from './mock-backend-instance.util.test'
-
+import CrudClient from '../src/CrudClient'
+import { buildMockNdjsonStream } from './mockBackendInstance'
+import type { ClientRequestContext, Filter } from '../src/types'
 
 describe('CrudClient', () => {
   nock.disableNetConnect()
@@ -87,7 +103,7 @@ describe('CrudClient', () => {
         .reply(400, { message: errorMessage })
 
       await assert.rejects(
-        async() => await client.count(requestCtx, filter),
+        async() => client.count(requestCtx, filter),
         new httpErrors.BadRequest(errorMessage)
       )
 
@@ -238,7 +254,7 @@ describe('CrudClient', () => {
         .reply(400, { message: errorMessage })
 
       await assert.rejects(
-        async() => await client.getList(requestCtx, filter),
+        async() => client.getList(requestCtx, filter),
         new httpErrors.BadRequest(errorMessage)
       )
 
@@ -354,7 +370,7 @@ describe('CrudClient', () => {
         .reply(400)
 
       await assert.rejects(
-        async() => await client.getExport(requestCtx, filter),
+        async() => client.getExport(requestCtx, filter),
         new httpErrors.BadRequest('Response code 400 (Bad Request)')
       )
 
@@ -366,7 +382,8 @@ describe('CrudClient', () => {
         mongoQuery: { fields: 'value' },
       }
 
-      const incompleteResponse = '{"id": "my-id", "property": "my-property"}\n{"id": "my-id-2", "property": "my-property-2"\n' // missing end brace
+      // missing end brace
+      const incompleteResponse = '{"id": "my-id", "property": "my-property"}\n{"id": "my-id-2", "property": "my-property-2"\n'
 
       const crudScope = nock(CRUD_BASE_PATH)
         .get('/export')
@@ -376,7 +393,7 @@ describe('CrudClient', () => {
         .reply(200, Readable.from(incompleteResponse))
 
       await assert.rejects(
-        async() => await client.getExport(requestCtx, filter)
+        async() => client.getExport(requestCtx, filter)
       )
 
       crudScope.done()
@@ -449,7 +466,7 @@ describe('CrudClient', () => {
         .get('/my-id')
         .reply(500, { message: errorMessage })
 
-      await assert.rejects(async() => await client.getById(requestCtx, id),
+      await assert.rejects(async() => client.getById(requestCtx, id),
         new httpErrors.InternalServerError(errorMessage)
       )
 
@@ -497,7 +514,7 @@ describe('CrudClient', () => {
         .reply(400)
 
       await assert.rejects(
-        async() => await client.create(requestCtx, body),
+        async() => client.create(requestCtx, body),
         new httpErrors.BadRequest('Response code 400 (Bad Request)')
       )
 
@@ -545,7 +562,7 @@ describe('CrudClient', () => {
         .reply(400)
 
       await assert.rejects(
-        async() => await client.bulkInsert(requestCtx, body),
+        async() => client.bulkInsert(requestCtx, body),
         new httpErrors.BadRequest('Response code 400 (Bad Request)')
       )
 
@@ -580,7 +597,7 @@ describe('CrudClient', () => {
         .reply(400)
 
       await assert.rejects(
-        async() => await client.trash({ ...requestCtx, headersToProxy }, 'my-id'),
+        async() => client.trash({ ...requestCtx, headersToProxy }, 'my-id'),
         new httpErrors.BadRequest('Response code 400 (Bad Request)')
       )
       crudScope.done()
@@ -668,7 +685,7 @@ describe('CrudClient', () => {
         .patch(`/${id}`, body)
         .reply(400, { message: errorMessage })
 
-      await assert.rejects(async() => await client.updateById(requestCtx, id, body),
+      await assert.rejects(async() => client.updateById(requestCtx, id, body),
         new httpErrors.BadRequest(errorMessage)
       )
 
@@ -747,7 +764,7 @@ describe('CrudClient', () => {
         .patch('/', body)
         .reply(400, { message: errorMessage })
 
-      await assert.rejects(async() => await client.updateMany(requestCtx, body),
+      await assert.rejects(async() => client.updateMany(requestCtx, body),
         new httpErrors.BadRequest(errorMessage)
       )
 
@@ -832,7 +849,7 @@ describe('CrudClient', () => {
         .patch('/', body)
         .reply(400, { message: errorMessage })
 
-      await assert.rejects(async() => await client.updateMany(requestCtx, body),
+      await assert.rejects(async() => client.updateMany(requestCtx, body),
         new httpErrors.BadRequest(errorMessage)
       )
 
@@ -917,7 +934,7 @@ describe('CrudClient', () => {
         .post('/upsert-one', body)
         .reply(400, { message: errorMessage })
 
-      await assert.rejects(async() => await client.upsertOne(requestCtx, body),
+      await assert.rejects(async() => client.upsertOne(requestCtx, body),
         new httpErrors.BadRequest(errorMessage)
       )
 
@@ -931,14 +948,14 @@ describe('CrudClient', () => {
 
     it('not ok with empty filter', async() => {
       await assert.rejects(
-        async() => await client.delete(requestCtx, {}),
+        async() => client.delete(requestCtx, {}),
         new httpErrors.BadRequest('Mongo query is required')
       )
     })
 
     it('not ok without query', async() => {
       await assert.rejects(
-        async() => await client.delete(requestCtx, { projection: ['field'], limit: 200, mongoQuery: {} }),
+        async() => client.delete(requestCtx, { projection: ['field'], limit: 200, mongoQuery: {} }),
         new httpErrors.BadRequest('Mongo query is required')
       )
     })

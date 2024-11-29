@@ -1,32 +1,28 @@
+/**
+ * Copyright 2024 Mia srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import got, { type RequestError } from 'got'
-import qs from 'qs'
 import httpErrors from 'http-errors'
 import { isEmpty } from 'lodash-es'
 
-import { type ClientRequestContext, type KeysMatching, getHttpErrors } from './utils'
+import type { ClientRequestContext, Filter, CrudUID, PatchBody, PatchBulkBody } from './types'
+import { queryFromFilter, getHttpErrors } from './utils'
 
-type CrudUID = {
-  _id: string
-}
-
-type PatchBulkEntry<T> = {
-  filter: Record<string, unknown>
-  update: PatchBody<T>
-}
-export type PatchBulkBody<T> = PatchBulkEntry<T>[]
-
-export type PatchBody<T> = {
-  $set?: Partial<T> & Record<string, unknown>
-  $unset?: Partial<T> & Record<string, unknown>
-  $inc?: Partial<KeysMatching<T, number>>
-  $mul?: Partial<KeysMatching<T, number>>
-  $currentDate?: Partial<T>
-  $push?: Partial<KeysMatching<T, unknown[]>> | Record<string, unknown>
-}
-
-export type ICrudClient<T> = Omit<CrudClient<T>, 'client' | 'resource'>
-
-class CrudClient<T> implements ICrudClient<T> {
+class CrudClient<T> {
   protected client
   protected resource
 
@@ -64,6 +60,10 @@ class CrudClient<T> implements ICrudClient<T> {
    * data are exported as a NDJSON stream from the crud and converted to an array of object
    *
    * @warning be careful about the size of the data to export, remember to set a reasonable limit
+   *
+   * @param {object} ctx The request object
+   * @param {object} filter The filter to apply
+   * @returns {array} The array of data
    */
   async getExport(ctx: ClientRequestContext, filter?: Filter): Promise<T[]> {
     const { logger, headersToProxy } = ctx
@@ -79,7 +79,7 @@ class CrudClient<T> implements ICrudClient<T> {
 
       logger.debug({ crudResource: this.resource }, 'export of data')
 
-      const data = await new Promise<T[]>((resolve, reject) => {
+      const res = await new Promise<T[]>((resolve, reject) => {
         let items: T[] = []
         let data = ''
 
@@ -94,21 +94,22 @@ class CrudClient<T> implements ICrudClient<T> {
           try {
             items = data
               .split('\n')
-              .filter(line => line.trim() !== '') // Filter out empty lines
+              // Filter out empty lines
+              .filter(line => line.trim() !== '')
               .map(line => JSON.parse(line))
             resolve(items)
-          } catch (e) {
-            logger.error({ error: e, crudResource: this.resource }, 'fails to parse the NDJSON data')
-            reject(e)
+          } catch (error) {
+            logger.error({ error, crudResource: this.resource }, 'fails to parse the NDJSON data')
+            reject(error)
           }
         })
 
-        stream.on('error', err => {
-          reject(err)
+        stream.on('error', (error) => {
+          reject(error)
         })
       })
 
-      return data
+      return res
     } catch (error) {
       logger.error({ error, crudResource: this.resource }, 'fails to get full export of data')
       throw getHttpErrors(error as RequestError)
@@ -255,7 +256,7 @@ class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async trash(ctx: ClientRequestContext, id: string) {
+  async trash(ctx: ClientRequestContext, id: string): Promise<void> {
     const { logger, headersToProxy } = ctx
     try {
       await this.client.post<T>(`${id}/state`, {
@@ -269,7 +270,7 @@ class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async deleteOne(ctx: ClientRequestContext, id: string) {
+  async deleteOne(ctx: ClientRequestContext, id: string): Promise<void> {
     const { logger, headersToProxy } = ctx
     try {
       await this.client.delete<T>(`${id}`, {
@@ -282,7 +283,7 @@ class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async delete(ctx: ClientRequestContext, filter: Filter) {
+  async delete(ctx: ClientRequestContext, filter: Filter): Promise<void> {
     if (isEmpty(filter.mongoQuery)) {
       throw new httpErrors.BadRequest('Mongo query is required')
     }
@@ -299,27 +300,6 @@ class CrudClient<T> implements ICrudClient<T> {
       throw getHttpErrors(error as RequestError)
     }
   }
-}
-
-export type Filter = {
-  mongoQuery?: Record<string, unknown>
-  limit?: number
-  skip?: number
-  projection?: string[],
-  rawProjection?: Record<string, 1 | 0>
-  sort?: string
-}
-function queryFromFilter(filter: Filter | undefined) {
-  return filter
-    ? qs.stringify({
-      _q: filter.mongoQuery ? JSON.stringify(filter.mongoQuery) : undefined,
-      _l: filter.limit,
-      _p: filter.projection?.join(','),
-      _s: filter.sort,
-      _sk: filter.skip,
-      _rawp: filter.rawProjection ? JSON.stringify(filter.rawProjection) : undefined,
-    })
-    : undefined
 }
 
 export default CrudClient
