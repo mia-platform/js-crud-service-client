@@ -16,5 +16,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './CrudClient'
+import CrudClient from './CrudClient'
+
+export type * from './CrudClient'
 export type * from './types'
+
+export { CrudClient as default }
