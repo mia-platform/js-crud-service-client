@@ -24,9 +24,10 @@
     "build:lib": "node --import=tsx scripts/build.ts",
     "build:types": "tsc --project scripts/tsconfig.build.json",
     "build": "yarn build:lib && yarn build:types",
-    "test": "node --import=tsx --test tests/**/*.test.*",
     "check-types": "tsc --skipLibCheck",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "node --import=tsx --test tests/**/*.test.*",
+    "coverage": "node --import=tsx --experimental-test-coverage --test tests/**/*.test.*"
   },
   "dependencies": {
     "got": "^11.8.6",
