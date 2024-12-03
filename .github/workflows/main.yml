@@ -21,3 +21,14 @@ jobs:
 
   build:
     uses: ./.github/workflows/build.yml
+
+  npm-publish:
+    if: github.ref_type == 'tag'
+    needs:
+      - tests
+      - lint
+      - build
+    uses: ./.github/workflows/publish.yml
+    secrets:
+      token: ${{ secrets.NPM_TOKEN }}
+  
