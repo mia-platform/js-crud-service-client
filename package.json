@@ -27,7 +27,7 @@
     "check-types": "tsc --skipLibCheck",
     "lint": "eslint .",
     "test": "node --import=tsx --test tests/**/*.test.*",
-    "coverage": "node --import=tsx --experimental-test-coverage --test tests/**/*.test.*"
+    "coverage": "./scripts/coverage.sh"
   },
   "dependencies": {
     "got": "^11.8.6",
@@ -56,6 +56,6 @@
     "typescript": "^5.7.2"
   },
   "engines": {
-    "node": ">=v18"
+    "node": ">=v22"
   }
 }
