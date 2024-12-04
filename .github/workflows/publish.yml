@@ -2,6 +2,9 @@ name: Publish
 
 on:
   workflow_call:
+    secrets:
+      token:
+        required: true
 
 jobs:
   checks:
@@ -26,7 +29,6 @@ jobs:
         path: dist
       
     - name: Publish
-      uses: JS-DevTools/npm-publish@19c28f1ef146469e409470805ea4279d47c3d35c # v3.1.1
-      with:
-        token: ${{ secrets.NPM_TOKEN }}
-        access: 'public'
+      run: yarn npm publish
+      env:
+        NPM_AUTH_TOKEN: ${{ secrets.token }}
