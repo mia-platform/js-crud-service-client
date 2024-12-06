@@ -61,3 +61,11 @@ export type PatchBulkEntry<T> = {
 }
 
 export type PatchBulkBody<T> = PatchBulkEntry<T>[]
+
+export type CrudItem<T> = T & {
+  _id: string
+  createdAt: string
+  creatorId: string
+  updatedAt: string
+  updaterId: string
+}
