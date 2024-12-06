@@ -64,6 +64,7 @@ export type PatchBulkBody<T> = PatchBulkEntry<T>[]
 
 export type CrudItem<T> = T & {
   _id: string
+  __STATE__: 'PUBLIC' | 'DRAFT' | 'TRASH' | 'DELETED'
   createdAt: string
   creatorId: string
   updatedAt: string
