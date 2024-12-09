@@ -19,7 +19,7 @@ import httpErrors, { type HttpError } from 'http-errors'
 import { type RequestError } from 'got'
 import qs from 'qs'
 
-import { type Filter } from './types'
+import type { Filter } from './types.js'
 
 function getGotErrorStatusCode(error: RequestError): number | undefined {
   if (error.response?.statusCode) {

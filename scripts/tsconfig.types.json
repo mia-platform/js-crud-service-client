@@ -3,8 +3,9 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
-    "sourceMap": true,
-    "outDir": "../dist/lib",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "outDir": "../dist/types",
     "baseUrl": "../src",
     "rootDir": "../src"
   },

@@ -16,15 +16,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import nock from 'nock'
-import Pino from 'pino'
+import { pino } from 'pino'
 import httpErrors from 'http-errors'
 import { Readable } from 'stream'
 import { describe, it } from 'node:test'
 import assert from 'node:assert'
 
-import CrudClient from '../src/CrudClient'
-import { buildMockNdjsonStream } from './mockBackendInstance'
-import type { ClientRequestContext, Filter } from '../src/types'
+import CrudClient from '../src/CrudClient.js'
+import { buildMockNdjsonStream } from './mockBackendInstance.js'
+import type { ClientRequestContext, Filter } from '../src/types.js'
 
 describe('CrudClient', () => {
   nock.disableNetConnect()
@@ -34,7 +34,7 @@ describe('CrudClient', () => {
     property: string
   }
 
-  const logger = Pino({ level: 'silent' })
+  const logger = pino({ level: 'silent' })
 
   const CRUD_BASE_PATH = 'https://example.org'
 

@@ -15,22 +15,24 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-import got, { type RequestError } from 'got'
+import got, { type RequestError, type Got } from 'got'
 import httpErrors from 'http-errors'
 import { isEmpty } from 'lodash-es'
 
-import type { ClientRequestContext, Filter, CrudUID, PatchBody, PatchBulkBody } from './types'
-import { queryFromFilter, getHttpErrors } from './utils'
+import type { ClientRequestContext, Filter, CrudUID, PatchBody, PatchBulkBody, ICrudClient } from './types.js'
+import { queryFromFilter, getHttpErrors } from './utils.js'
 
-class CrudClient<T> {
-  protected client
+class CrudClient<T> implements ICrudClient<T> {
+  protected client: Got
   protected resource
 
   constructor(prefixUrl: string, resource: string) {
+    // @ts-expect-error TS moduleResolution "node16" has problems with default exports
     this.client = got.extend({
       prefixUrl,
       retry: 0,
     })
+
     this.resource = resource
   }
 
@@ -84,7 +86,8 @@ class CrudClient<T> {
         let data = ''
 
         stream
-          .on('data', chunk => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .on('data', (chunk: any) => {
             // Accumulate the chunks
             data += chunk.toString()
           })
@@ -104,7 +107,7 @@ class CrudClient<T> {
           }
         })
 
-        stream.on('error', (error) => {
+        stream.on('error', (error: Error) => {
           reject(error)
         })
       })

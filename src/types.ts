@@ -17,9 +17,9 @@
  */
 import { type BaseLogger } from 'pino'
 
-import type CrudClient from './CrudClient'
+import type CrudClient from './CrudClient.js'
 
-export type ICrudClient<T> = Omit<typeof CrudClient<T>, 'client' | 'resource'>
+export type ICrudClient<T> = Omit<CrudClient<T>, 'client' | 'resource'>
 
 export type KeysMatching<T, V> = {[K in keyof T]-?: T[K] extends V ? K : never}[keyof T];
 

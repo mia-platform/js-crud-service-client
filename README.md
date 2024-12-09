@@ -1,13 +1,18 @@
-# js-crud-service-client
+<div align="center">
+
+  <h1>JS CRUD Service client</h1>
+ 
+  [![license][license-svg]](./LICENSE)
+  [![javascript style guide][standard-mia-svg]][standard-mia]  
+</div>
 
 The official [CRUD Service](https://github.com/mia-platform/crud-service) JavaScript client.
 
 ## Installation
 
-Using npm:
-
 ```sh
 npm i @mia-platform/js-crud-service-client
+yarn add @mia-platform/js-crud-service-client
 ```
 
 ## How to use
