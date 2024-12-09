@@ -17,17 +17,16 @@
  */
 import got, { type RequestError, type Got } from 'got'
 import httpErrors from 'http-errors'
-import { isEmpty } from 'lodash-es'
+import isEmpty from 'lodash.isempty'
 
-import type { ClientRequestContext, Filter, CrudUID, PatchBody, PatchBulkBody, ICrudClient } from './types.js'
-import { queryFromFilter, getHttpErrors } from './utils.js'
+import type { ClientRequestContext, Filter, CrudUID, PatchBody, PatchBulkBody, ICrudClient } from './types'
+import { queryFromFilter, getHttpErrors } from './utils'
 
-class CrudClient<T> implements ICrudClient<T> {
+export class CrudClient<T> implements ICrudClient<T> {
   protected client: Got
   protected resource
 
   constructor(prefixUrl: string, resource: string) {
-    // @ts-expect-error TS moduleResolution "node16" has problems with default exports
     this.client = got.extend({
       prefixUrl,
       retry: 0,
@@ -304,5 +303,3 @@ class CrudClient<T> implements ICrudClient<T> {
     }
   }
 }
-
-export default CrudClient

@@ -22,9 +22,9 @@ import { Readable } from 'stream'
 import { describe, it } from 'node:test'
 import assert from 'node:assert'
 
-import CrudClient from '../src/CrudClient.js'
-import { buildMockNdjsonStream } from './mockBackendInstance.js'
-import type { ClientRequestContext, Filter } from '../src/types.js'
+import { CrudClient } from '../src/CrudClient'
+import { buildMockNdjsonStream } from './mockBackendInstance'
+import type { ClientRequestContext, Filter } from '../src/types'
 
 describe('CrudClient', () => {
   nock.disableNetConnect()
