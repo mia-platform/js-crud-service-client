@@ -4,9 +4,9 @@
   "compilerOptions": {
     "noEmit": false,
     "sourceMap": true,
-    "outDir": "../dist/lib",
+    "outDir": "../dist",
     "baseUrl": "../src",
-    "rootDir": "../src"
+    "rootDir": "../src",
   },
   "include": ["../src"]
 }

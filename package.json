@@ -15,10 +15,8 @@
   "files": [
     "dist"
   ],
-  "type": "module",
   "packageManager": "yarn@4.5.3",
-  "main": "dist/lib/index.js",
-  "module": "dist/lib/index.js",
+  "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "scripts": {
     "build:lib": "tsc --project scripts/tsconfig.build.json",
@@ -32,14 +30,13 @@
   "dependencies": {
     "got": "^11.8.6",
     "http-errors": "^2.0.0",
-    "lodash-es": "^4.17.21",
+    "lodash.isempty": "^4.4.0",
     "qs": "^6.13.1"
   },
   "devDependencies": {
     "@mia-platform/eslint-config-mia": "^3.0.0",
-    "@tsconfig/node18": "^18.2.4",
     "@types/http-errors": "^2.0.4",
-    "@types/lodash-es": "^4.17.12",
+    "@types/lodash.isempty": "^4.4.9",
     "@types/qs": "^6.9.17",
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",

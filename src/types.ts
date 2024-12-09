@@ -17,7 +17,7 @@
  */
 import { type BaseLogger } from 'pino'
 
-import type CrudClient from './CrudClient.js'
+import type { CrudClient } from './CrudClient'
 
 export type ICrudClient<T> = Omit<CrudClient<T>, 'client' | 'resource'>
 
