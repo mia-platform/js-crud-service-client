@@ -53,6 +53,7 @@ export type PatchBody<T> = {
   $mul?: Partial<KeysMatching<T, number>>
   $currentDate?: Partial<T>
   $push?: Partial<KeysMatching<T, unknown[]>> | Record<string, unknown>
+  $pull?: Partial<KeysMatching<T, unknown[]>> | Record<string, unknown>
 }
 
 export type PatchBulkEntry<T> = {
