@@ -285,18 +285,19 @@ export class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async delete(ctx: ClientRequestContext, filter: Filter): Promise<void> {
+  async delete(ctx: ClientRequestContext, filter: Filter): Promise<number> {
     if (isEmpty(filter.mongoQuery)) {
       throw new httpErrors.BadRequest('Mongo query is required')
     }
 
     const { logger, headersToProxy } = ctx
     try {
-      await this.client.delete<T>('', {
+      const { body: deletedCount } = await this.client.delete<number>('', {
         responseType: 'json',
         headers: headersToProxy,
         searchParams: queryFromFilter(filter),
       })
+      return deletedCount
     } catch (error) {
       logger.error({ error }, 'failed to delete items')
       throw getHttpErrors(error as RequestError)

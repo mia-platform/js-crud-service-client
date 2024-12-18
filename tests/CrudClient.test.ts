@@ -964,9 +964,10 @@ describe('CrudClient', () => {
       const crudScope = nock(CRUD_BASE_PATH)
         .delete('/')
         .query(query)
-        .reply(200)
+        .reply(200, '1')
 
-      await client.delete(requestCtx, filter)
+      const resp = await client.delete(requestCtx, filter)
+      assert.equal(resp, 1)
       crudScope.done()
     })
 
