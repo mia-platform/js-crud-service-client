@@ -19,7 +19,7 @@ import got, { type RequestError, type Got } from 'got'
 import httpErrors from 'http-errors'
 import isEmpty from 'lodash.isempty'
 
-import type { ClientRequestContext, Filter, CrudUID, PatchBody, PatchBulkBody, ICrudClient } from './types'
+import type { ClientRequestContext, Filter, CrudUID, PatchBody, PatchBulkBody, ICrudClient, UpsertBody } from './types'
 import { queryFromFilter, getHttpErrors } from './utils'
 
 export class CrudClient<T> implements ICrudClient<T> {
@@ -191,7 +191,7 @@ export class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async upsertOne(ctx: ClientRequestContext, body: Record<string, unknown>, filter?: Filter): Promise<T> {
+  async upsertOne(ctx: ClientRequestContext, body: UpsertBody<T>, filter?: Filter): Promise<T> {
     const { logger, headersToProxy } = ctx
     try {
       const { body: item } = await this.client.post<T & CrudUID>('upsert-one', {

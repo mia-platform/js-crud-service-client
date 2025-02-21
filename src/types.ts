@@ -71,3 +71,7 @@ export type CrudItem<T> = T & {
   updatedAt: string
   updaterId: string
 }
+
+export type UpsertBody<T> = PatchBody<T> & {
+  $setOnInsert?: Partial<T> & Record<string, unknown>
+}
