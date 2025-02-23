@@ -35,7 +35,7 @@ export class CrudClient<T> implements ICrudClient<T> {
     this.resource = resource
   }
 
-  async getList(ctx: ClientRequestContext, filter?: Filter): Promise<T[]> {
+  async getList(ctx: ClientRequestContext, filter?: Filter<T>): Promise<T[]> {
     const { logger, headersToProxy } = ctx
     try {
       const { body: itemList } = await this.client.get<T[]>('', {
@@ -66,7 +66,7 @@ export class CrudClient<T> implements ICrudClient<T> {
    * @param {object} filter The filter to apply
    * @returns {array} The array of data
    */
-  async getExport(ctx: ClientRequestContext, filter?: Filter): Promise<T[]> {
+  async getExport(ctx: ClientRequestContext, filter?: Filter<T>): Promise<T[]> {
     const { logger, headersToProxy } = ctx
     try {
       const stream = this.client.stream('export', {
@@ -118,7 +118,7 @@ export class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async count(ctx: ClientRequestContext, filter?: Omit<Filter, 'projection'>): Promise<number> {
+  async count(ctx: ClientRequestContext, filter?: Omit<Filter<T>, 'projection'>): Promise<number> {
     const { logger, headersToProxy } = ctx
     try {
       const { body: count } = await this.client.get<number>('count', {
@@ -138,7 +138,7 @@ export class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async getById(ctx: ClientRequestContext, id: string, filter?: Pick<Filter, 'projection'>): Promise<T> {
+  async getById(ctx: ClientRequestContext, id: string, filter?: Pick<Filter<T>, 'projection'>): Promise<T> {
     const { logger, headersToProxy } = ctx
     try {
       const { body: item } = await this.client.get<T>(id, {
@@ -191,7 +191,7 @@ export class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async upsertOne(ctx: ClientRequestContext, body: UpsertBody<T>, filter?: Filter): Promise<T> {
+  async upsertOne(ctx: ClientRequestContext, body: UpsertBody<T>, filter?: Filter<T>): Promise<T> {
     const { logger, headersToProxy } = ctx
     try {
       const { body: item } = await this.client.post<T & CrudUID>('upsert-one', {
@@ -208,7 +208,7 @@ export class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async updateById(ctx: ClientRequestContext, id: string, body: PatchBody<T>, filter?: Filter): Promise<T> {
+  async updateById(ctx: ClientRequestContext, id: string, body: PatchBody<T>, filter?: Filter<T>): Promise<T> {
     const { logger, headersToProxy } = ctx
     try {
       const { body: item } = await this.client.patch<T>(id, {
@@ -225,7 +225,7 @@ export class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async updateMany(ctx: ClientRequestContext, body: PatchBody<T>, filter?: Filter): Promise<number> {
+  async updateMany(ctx: ClientRequestContext, body: PatchBody<T>, filter?: Filter<T>): Promise<number> {
     const { logger, headersToProxy } = ctx
     try {
       const { body: item } = await this.client.patch<number>('', {
@@ -285,7 +285,7 @@ export class CrudClient<T> implements ICrudClient<T> {
     }
   }
 
-  async delete(ctx: ClientRequestContext, filter: Filter): Promise<number> {
+  async delete(ctx: ClientRequestContext, filter: Filter<T>): Promise<number> {
     if (isEmpty(filter.mongoQuery)) {
       throw new httpErrors.BadRequest('Mongo query is required')
     }
