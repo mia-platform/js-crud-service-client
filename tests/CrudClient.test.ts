@@ -240,6 +240,37 @@ describe('CrudClient', () => {
       assert.deepStrictEqual(response, expectedResponse)
     })
 
+    it('returns the entities that match a filter with document filter', async() => {
+      const filter: Filter<Item> = {
+        id: 'my-id',
+        limit: 5,
+        skip: 1,
+        projection: ['id'],
+      }
+
+      const expectedResponse = [
+        {
+          id: 'my-id',
+          property: 'my-property',
+        },
+      ]
+      const crudScope = nock(CRUD_BASE_PATH)
+        .get('/')
+        .query({
+          id: 'my-id',
+          _l: '5',
+          _sk: '1',
+          _p: 'id',
+        })
+        .reply(200, expectedResponse)
+
+      const response = await client.getList(requestCtx, filter)
+      crudScope.done()
+
+      assert.deepStrictEqual(response, expectedResponse)
+    })
+
+
     it('throws 400', async() => {
       const filter = {
         mongoQuery: { fields: 'value' },

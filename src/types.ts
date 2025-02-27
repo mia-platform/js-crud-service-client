@@ -33,7 +33,7 @@ export type ClientRequestContext = {
   localRequestId: string
 }
 
-export type Filter = {
+export type Filter<T = Record<string, unknown>> = Omit<Partial<Record<KeysMatching<T, string>, string>>, 'mongoQuery' | 'limit' | 'skip' | 'projection' | 'rawProjection' | 'sort'> & {
   mongoQuery?: Record<string, unknown>
   limit?: number
   skip?: number
@@ -70,4 +70,8 @@ export type CrudItem<T> = T & {
   creatorId: string
   updatedAt: string
   updaterId: string
+}
+
+export type UpsertBody<T> = PatchBody<T> & {
+  $setOnInsert?: Partial<T> & Record<string, unknown>
 }

@@ -19,7 +19,7 @@ import httpErrors, { type HttpError } from 'http-errors'
 import { type RequestError } from 'got'
 import qs from 'qs'
 
-import type { Filter } from './types'
+import type { Filter, KeysMatching } from './types'
 
 function getGotErrorStatusCode(error: RequestError): number | undefined {
   if (error.response?.statusCode) {
@@ -44,15 +44,36 @@ export function getHttpErrors(error: RequestError): HttpError {
   return httpErrors(getGotErrorStatusCode(error) ?? 500, getGotErrorMessage(error))
 }
 
-export function queryFromFilter(filter: Filter | undefined): string | undefined {
-  return filter
-    ? qs.stringify({
-      _q: filter.mongoQuery ? JSON.stringify(filter.mongoQuery) : undefined,
-      _l: filter.limit,
-      _p: filter.projection?.join(','),
-      _s: filter.sort,
-      _sk: filter.skip,
-      _rawp: filter.rawProjection ? JSON.stringify(filter.rawProjection) : undefined,
-    })
-    : undefined
+type CrudQuery<T> = Partial<Record<KeysMatching<T, string>, string>> & {
+  _q?: string
+  _l?: number
+  _p?: string
+  _s?: string
+  _sk?: number
+  _rawp?: string
+}
+
+
+export function queryFromFilter<T>(filter: Filter<T> | undefined): string | undefined {
+  if (!filter) {
+    return undefined
+  }
+
+  const createQueryParams = {
+    mongoQuery: (value: Filter<T>['mongoQuery']) => ({ _q: value ? JSON.stringify(value) : undefined }),
+    limit: (value: Filter<T>['limit']) => ({ _l: value }),
+    projection: (value: Filter<T>['projection']) => ({ _p: value?.join(',') }),
+    sort: (value: Filter<T>['sort']) => ({ _s: value }),
+    skip: (value: Filter<T>['skip']) => ({ _sk: value }),
+    rawProjection: (value: Filter<T>['rawProjection']) => ({ _rawp: value ? JSON.stringify(value) : undefined }),
+  } as const
+
+  const queryObject = Object.entries(filter).reduce<CrudQuery<T>>((acc, [key, value]) => ({
+    ...acc,
+    ...(key in createQueryParams
+      ? createQueryParams[key as keyof typeof createQueryParams](value as never)
+      : { [key]: value }),
+  }), {})
+
+  return qs.stringify(queryObject)
 }
