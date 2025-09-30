@@ -29,5 +29,3 @@ jobs:
       - lint
       - build
     uses: ./.github/workflows/publish.yml
-    secrets:
-      token: ${{ secrets.NPM_TOKEN }}
