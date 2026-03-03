@@ -15,7 +15,7 @@
   "files": [
     "dist"
   ],
-  "packageManager": "yarn@4.10.3",
+  "packageManager": "yarn@4.13.0",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "scripts": {
@@ -53,6 +53,6 @@
     "typescript": "^5.9.3"
   },
   "engines": {
-    "node": ">=v22"
+    "node": ">=v24"
   }
 }
