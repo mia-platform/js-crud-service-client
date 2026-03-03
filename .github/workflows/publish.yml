@@ -3,6 +3,10 @@ name: Publish
 on:
   workflow_call:
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   checks:
     runs-on: ubuntu-latest
